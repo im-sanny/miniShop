@@ -1,0 +1,2 @@
+- Use fmt.Println to see output in the terminal to easily debug/logging.
+- Use fmt.Fprintf to send output to the user/browser.
