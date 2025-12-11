@@ -11,7 +11,8 @@ func Serve() {
 	mux := http.NewServeMux()
 
 	mux.Handle("GET /items", http.HandlerFunc(handlers.GetItems))
-	mux.Handle("POST /create-item", http.HandlerFunc(handlers.PostItem))
+	mux.Handle("GET /items/{itemId}", http.HandlerFunc(handlers.GetItemById))
+	mux.Handle("POST /items", http.HandlerFunc(handlers.PostItem))
 
 	fmt.Println("server running on :3001")
 
