@@ -13,3 +13,5 @@
   Here, ... is after a slice variable → “expand the slice” or spreading
   Means: “take all elements of this slice and pass them individually”
   Needed because append expects multiple elements, not a slice
+
+- Environment variables are always strings that's why I need to convert those in other format if i need.
