@@ -5,6 +5,7 @@ import (
 	"miniShop/config"
 	middleware "miniShop/rest/middlewares"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -26,5 +27,6 @@ func Start(cnf config.Config) {
 	// this will catch error if theres any while running the server
 	if err != nil {
 		fmt.Println("Error starting the server", err)
+		os.Exit(1)
 	}
 }
