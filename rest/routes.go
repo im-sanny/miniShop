@@ -1,8 +1,8 @@
-package cmd
+package rest
 
 import (
-	"miniShop/handlers"
-	"miniShop/middleware"
+	"miniShop/rest/handlers"
+	middleware "miniShop/rest/middlewares"
 	"net/http"
 )
 
