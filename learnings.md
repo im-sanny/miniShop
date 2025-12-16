@@ -15,3 +15,16 @@
   Needed because append expects multiple elements, not a slice
 
 - Environment variables are always strings that's why I need to convert those in other format if i need.
+
+# Create user handler
+
+- When I send a request with correct data, CreateUserHandler receives it, decodes the JSON into a User struct, then sends that user to StoreUser to be stored. StoreUser adds a user ID and returns the updated user, which is then sent back in the response.
+
+# Rule to return pointer from a range
+
+- Never return the address of a range variable (&u)
+
+Always use:
+for i := range slice {
+return &slice[i]
+}
