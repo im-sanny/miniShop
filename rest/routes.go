@@ -12,4 +12,5 @@ func initRoutes(mux *http.ServeMux, manager *middleware.Manager) {
 	mux.Handle("POST /items", manager.With(http.HandlerFunc(handlers.CreateItemHandler)))
 	mux.Handle("PUT /items/{itemId}", manager.With(http.HandlerFunc(handlers.UpdateItemHandler)))
 	mux.Handle("DELETE /items/{itemId}", manager.With(http.HandlerFunc(handlers.DeleteItemHandler)))
+	mux.Handle("POST /users", manager.With(http.HandlerFunc(handlers.CreateUserHandler)))
 }
