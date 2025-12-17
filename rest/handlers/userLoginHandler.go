@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"miniShop/config"
 	"miniShop/database"
 	"miniShop/util"
 	"net/http"
@@ -27,5 +28,17 @@ func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	util.SendData(w, logUser, http.StatusOK)
+	cnf := config.GetConfig()
+	accessToken, err := util.CreateSignedJwt(cnf.JWTSecretKey, util.Payload{
+		Sub:       logUser.Id,
+		FirstName: logUser.FirstName,
+		LastName:  logUser.LastName,
+		Email:     logUser.Email,
+	})
+	if err != nil {
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	util.SendData(w, accessToken, http.StatusOK)
 }
