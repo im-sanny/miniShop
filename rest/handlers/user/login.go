@@ -1,4 +1,4 @@
-package handlers
+package user
 
 import (
 	"encoding/json"
@@ -13,7 +13,7 @@ type LoginReq struct {
 	Password string `json:"password"`
 }
 
-func UserLoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	var loginReq LoginReq
 
 	err := json.NewDecoder(r.Body).Decode(&loginReq)

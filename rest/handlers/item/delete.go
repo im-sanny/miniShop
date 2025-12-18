@@ -1,4 +1,4 @@
-package handlers
+package item
 
 import (
 	"miniShop/database"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func DeleteItemHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	itemId := r.PathValue("itemId")
 
 	id, err := strconv.Atoi(itemId)

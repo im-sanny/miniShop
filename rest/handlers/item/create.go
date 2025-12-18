@@ -1,4 +1,4 @@
-package handlers
+package item
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func CreateItemHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	var newItem database.Item          // Create a new album struct to hold incoming data
 	decoder := json.NewDecoder(r.Body) // Decode JSON request body into newAlbum
 	if err := decoder.Decode(&newItem); err != nil {

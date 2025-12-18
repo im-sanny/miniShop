@@ -3,13 +3,33 @@ package rest
 import (
 	"fmt"
 	"miniShop/config"
+	"miniShop/rest/handlers/item"
+	"miniShop/rest/handlers/user"
 	middleware "miniShop/rest/middlewares"
 	"net/http"
 	"os"
 	"strconv"
 )
 
-func Start(cnf config.Config) {
+type Server struct {
+	cnf         *config.Config
+	itemHandler *item.Handler
+	userHandler *user.Handler
+}
+
+func NewServer(
+	cnf *config.Config,
+	itemHandler *item.Handler,
+	userHandler *user.Handler,
+) *Server {
+	return &Server{
+		cnf:         cnf,
+		itemHandler: itemHandler,
+		userHandler: userHandler,
+	}
+}
+
+func (server *Server) Start() {
 	manager := middleware.NewManager()
 	manager.Use(
 		middleware.Cors,
@@ -19,9 +39,11 @@ func Start(cnf config.Config) {
 
 	mux := http.NewServeMux()
 	wrappedMux := manager.WrapMux(mux)
-	initRoutes(mux, manager)
 
-	addr := ":" + strconv.Itoa(cnf.HttpPort)
+	server.itemHandler.RegisterRoutes(mux, manager)
+	server.userHandler.RegisterRoutes(mux, manager)
+
+	addr := ":" + strconv.Itoa(server.cnf.HttpPort)
 	fmt.Println("server running on", addr)
 	err := http.ListenAndServe(addr, wrappedMux)
 	// this will catch error if theres any while running the server

@@ -1,4 +1,4 @@
-package handlers
+package item
 
 import (
 	"miniShop/database"
@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func GetItemByIDHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := r.PathValue("itemId") // All values coming from the URL are strings. So we collect the itemId as a string first, then convert it to int so database queries can use it.
 
 	id, err := strconv.Atoi(idStr) // converting idStr into int which was in string form then it'll store in id

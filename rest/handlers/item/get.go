@@ -1,4 +1,4 @@
-package handlers
+package item
 
 import (
 	"miniShop/database"
@@ -6,6 +6,6 @@ import (
 	"net/http"
 )
 
-func GetItemHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
 	util.SendData(w, database.GetAllItem(), http.StatusOK)
 }

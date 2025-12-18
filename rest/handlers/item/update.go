@@ -1,4 +1,4 @@
-package handlers
+package item
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func UpdateItemHandler(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	itemId := r.PathValue("itemId")
 
 	id, err := strconv.Atoi(itemId)

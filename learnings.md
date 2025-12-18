@@ -24,7 +24,24 @@
 
 - Never return the address of a range variable (&u)
 
-Always use:
-for i := range slice {
-return &slice[i]
-}
+- Always use:
+  `for i := range slice {
+  return &slice[i]
+}`
+
+---
+
+- In Go, functions that create and return a struct should usually be named:
+  `NewXxx`
+
+- Simple rule to remember:
+  If the package already provides context, don’t repeat it in function names
+
+- Go’s rule of thumb:
+  Package name gives context, function names should be short
+
+- Rule you can remember:
+  Receiver name is for mechanics, not meaning
+  Meaning comes from package + type
+
+---
