@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"encoding/base64"
 	"miniShop/config"
+	"miniShop/util"
 	"net/http"
 	"strings"
 )
@@ -21,7 +22,7 @@ func AuthenticateJWT(next http.Handler) http.Handler {
 		// WHY: JWT is typically sent as "Authorization: Bearer <token>"
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
-			http.Error(w, "Unauthorized request", http.StatusUnauthorized)
+			util.SendError(w, http.StatusUnauthorized, "Unauthorized request")
 			return
 		}
 
@@ -29,7 +30,7 @@ func AuthenticateJWT(next http.Handler) http.Handler {
 		// WHY: We must extract only the JWT part
 		authParts := strings.Split(authHeader, " ")
 		if len(authParts) != 2 {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			util.SendError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 
@@ -39,7 +40,7 @@ func AuthenticateJWT(next http.Handler) http.Handler {
 		// WHY: JWT must always have exactly 3 parts
 		tokenParts := strings.Split(accessToken, ".")
 		if len(tokenParts) != 3 {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			util.SendError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 
@@ -70,7 +71,7 @@ func AuthenticateJWT(next http.Handler) http.Handler {
 		// Step 6: Compare calculated signature with received signature
 		// WHY: This verifies token integrity and authenticity
 		if calculatedSignature != receivedSignature {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			util.SendError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 

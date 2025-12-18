@@ -2,17 +2,20 @@ package util
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
-func SendData(w http.ResponseWriter, data interface{}, statusCode int) {
+// SendData writes the given data as JSON with the specified status code.
+func SendData(w http.ResponseWriter, statusCode int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	encoder := json.NewEncoder(w)
-	encoder.Encode(data)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		log.Printf("failed to encode response: %v", err)
+	}
 }
 
-func SendError(w http.ResponseWriter, msg string, statusCode int) {
-	w.WriteHeader(statusCode)
-	encoder := json.NewEncoder(w)
-	encoder.Encode(msg)
+// SendError sends a standardized JSON error response.
+func SendError(w http.ResponseWriter, statusCode int, message string) {
+	SendData(w, statusCode, map[string]string{"error": message})
 }

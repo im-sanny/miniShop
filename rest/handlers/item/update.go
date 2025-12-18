@@ -2,29 +2,43 @@ package item
 
 import (
 	"encoding/json"
-	"miniShop/database"
+	"miniShop/repo"
 	"miniShop/util"
 	"net/http"
 	"strconv"
 )
+
+type ReqUpdateItem struct {
+	Name  string  `json:"name"`
+	Brand string  `json:"brand"`
+	Price float64 `json:"price"`
+}
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	itemId := r.PathValue("itemId")
 
 	id, err := strconv.Atoi(itemId)
 	if err != nil {
-		http.Error(w, "invalid item id", http.StatusBadRequest)
+		util.SendError(w, http.StatusBadRequest, "invalid item id")
 		return
 	}
 
-	var newItem database.Item
-	error := json.NewDecoder(r.Body).Decode(&newItem)
-	if error != nil {
-		http.Error(w, "invalid json", http.StatusBadRequest)
+	var req ReqUpdateItem
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		util.SendError(w, http.StatusBadRequest, "invalid json")
 		return
 	}
 
-	newItem.ID = id
-	database.UpdateItem(newItem)
-	util.SendData(w, newItem, http.StatusOK)
+	item, err := h.itemRepo.Update(repo.Item{
+		ID:    id,
+		Name:  req.Name,
+		Brand: req.Brand,
+		Price: req.Price,
+	})
+	if err != nil {
+		util.SendError(w, http.StatusInternalServerError, "Failed to update item")
+		return
+	}
+
+	util.SendData(w, http.StatusOK, item)
 }

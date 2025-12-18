@@ -1,11 +1,14 @@
 package item
 
 import (
-	"miniShop/database"
 	"miniShop/util"
 	"net/http"
 )
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	util.SendData(w, database.GetAllItem(), http.StatusOK)
+	itemList, err := h.itemRepo.Get()
+	if err != nil {
+		util.SendError(w, http.StatusInternalServerError, "Internal server error")
+	}
+	util.SendData(w, http.StatusOK, itemList)
 }

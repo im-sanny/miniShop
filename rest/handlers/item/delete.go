@@ -1,7 +1,6 @@
 package item
 
 import (
-	"miniShop/database"
 	"miniShop/util"
 	"net/http"
 	"strconv"
@@ -12,10 +11,15 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	id, err := strconv.Atoi(itemId)
 	if err != nil {
-		http.Error(w, "invalid req", http.StatusBadRequest)
+		util.SendError(w, http.StatusBadRequest, "invalid req")
 		return
 	}
 
-	database.DeleteItemById(id)
-	util.SendData(w, "Item has been deleted successfully", http.StatusOK)
+	err = h.itemRepo.Delete(id)
+	if err != nil {
+		util.SendError(w, http.StatusBadRequest, "Internal server error")
+		return
+	}
+
+	util.SendData(w, http.StatusOK, "Item deleted successfully")
 }

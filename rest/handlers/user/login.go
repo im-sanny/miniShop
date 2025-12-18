@@ -2,8 +2,7 @@ package user
 
 import (
 	"encoding/json"
-	"miniShop/config"
-	"miniShop/database"
+	"fmt"
 	"miniShop/util"
 	"net/http"
 )
@@ -14,31 +13,31 @@ type LoginReq struct {
 }
 
 func (h *Handler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
-	var loginReq LoginReq
+	var req LoginReq
 
-	err := json.NewDecoder(r.Body).Decode(&loginReq)
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		util.SendError(w, http.StatusBadRequest, "Invalid request body")
 		return
 	}
 
-	logUser := database.FindUser(loginReq.Email, loginReq.Password)
-	if logUser == nil {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+	usr, err := h.userRepo.Find(req.Email, req.Password)
+	if err != nil {
+		fmt.Println(err)
+		util.SendError(w, http.StatusUnauthorized, "Invalid email or password")
 		return
 	}
 
-	cnf := config.GetConfig()
-	accessToken, err := util.CreateSignedJwt(cnf.JWTSecretKey, util.Payload{
-		Sub:       logUser.Id,
-		FirstName: logUser.FirstName,
-		LastName:  logUser.LastName,
-		Email:     logUser.Email,
+	accessToken, err := util.CreateSignedJwt(h.cnf.JWTSecretKey, util.Payload{
+		Sub:       usr.Id,
+		FirstName: usr.FirstName,
+		LastName:  usr.LastName,
+		Email:     usr.Email,
 	})
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		util.SendError(w, http.StatusInternalServerError, "Internal server error")
 		return
 	}
 
-	util.SendData(w, accessToken, http.StatusOK)
+	util.SendData(w, http.StatusOK, accessToken)
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var configurations Config
+var cfg *Config //Config → type, config / cfg → value
 
 type Config struct {
 	Version      string
@@ -54,7 +54,7 @@ func loadConfig() {
 		os.Exit(1)
 	}
 
-	configurations = Config{
+	cfg = &Config{
 		Version:      version,
 		ServiceName:  serviceName,
 		HttpPort:     int(port),
@@ -63,6 +63,8 @@ func loadConfig() {
 }
 
 func GetConfig() *Config {
-	loadConfig()
-	return &configurations
+	if cfg == nil { // this will stop repetition of loading config
+		loadConfig()
+	}
+	return cfg
 }

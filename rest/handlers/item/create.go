@@ -2,19 +2,33 @@ package item
 
 import (
 	"encoding/json"
-	"miniShop/database"
+	"miniShop/repo"
 	"miniShop/util"
 	"net/http"
 )
 
+type ReqCreateItem struct {
+	Name  string  `json:"name"`
+	Brand string  `json:"brand"`
+	Price float64 `json:"price"`
+}
+
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var newItem database.Item          // Create a new album struct to hold incoming data
+	var req ReqCreateItem
 	decoder := json.NewDecoder(r.Body) // Decode JSON request body into newAlbum
-	if err := decoder.Decode(&newItem); err != nil {
-		http.Error(w, "invalid JSON", http.StatusBadRequest)
+	if err := decoder.Decode(&req); err != nil {
+		util.SendError(w, http.StatusBadRequest, "invalid JSON")
 		return
 	}
 
-	createItem := database.CreateItem(newItem)
-	util.SendData(w, createItem, http.StatusCreated) // Send the created album back to client with 201 Created
+	createdItem, err := h.itemRepo.Create(repo.Item{
+		Name:  req.Name,
+		Brand: req.Brand,
+		Price: req.Price,
+	})
+	if err != nil {
+		util.SendError(w, http.StatusInternalServerError, "Internal server error")
+		return
+	}
+	util.SendData(w, http.StatusCreated, createdItem)
 }
