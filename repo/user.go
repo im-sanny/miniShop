@@ -1,17 +1,20 @@
 package repo
 
-import "errors"
+import (
+	"database/sql"
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+)
 
 type User struct {
-	Id          int    `json:"id"`
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	Email       string `json:"email"`
-	Password    string `json:"password"`
-	IsShopOwner bool   `json:"is_shop_owner"`
+	ID          int    `json:"id" db:"id"`
+	FirstName   string `json:"first_name" db:"first_name"`
+	LastName    string `json:"last_name" db:"last_name"`
+	Email       string `json:"email" db:"email"`
+	Password    string `json:"password" db:"password"`
+	IsShopOwner bool   `json:"is_shop_owner" db:"is_shop_owner"`
 }
-
-var ErrUserNotFound = errors.New("user not found")
 
 type UserRepo interface {
 	Create(user User) (*User, error)
@@ -19,33 +22,61 @@ type UserRepo interface {
 }
 
 type userRepo struct {
-	users []User
+	db *sqlx.DB
 }
 
-func NewUserRepo() UserRepo {
-	return &userRepo{}
+func NewUserRepo(db *sqlx.DB) UserRepo {
+	return &userRepo{
+		db: db,
+	}
 }
 
-// func (u userRepo) Create(user User) (*User, error) {
-// 	if user.Id != 0 {
-// 		return &user, nil
-// 	}
-
-// 	user.Id = len(u.users) + 1
-// 	u.users = append(u.users, user)
-// 	return &user, nil
-// }
 func (u *userRepo) Create(user User) (*User, error) {
-	user.Id = len(u.users) + 1
-	u.users = append(u.users, user)
+	query := `
+	INSERT INTO users(
+		first_name,
+		last_name,
+		email,
+		password,
+		is_shop_owner
+	)
+		VALUES (
+			:first_name,
+			:last_name,
+			:email,
+			:password,
+			:is_shop_owner
+		)
+		RETURNING id;
+	`
+	var userID int
+	rows, err := u.db.NamedQuery(query, user)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	if rows.Next() {
+		rows.Scan(&userID)
+	}
+	user.ID = userID
 	return &user, nil
 }
 
 func (u *userRepo) Find(email, pass string) (*User, error) {
-	for index := range u.users {
-		if u.users[index].Email == email && u.users[index].Password == pass {
-			return &u.users[index], nil
+	var user User
+	query := `
+		SELECT id, first_name, last_name, email, password, is_shop_owner
+		FROM users
+		WHERE email = $1 AND password = $2
+		LIMIT 1
+	`
+	err := u.db.Get(&user, query, email, pass)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
 		}
+		return nil, err
 	}
-	return nil, ErrUserNotFound
+	return &user, nil
+
 }

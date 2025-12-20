@@ -29,7 +29,7 @@ func (h *Handler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	accessToken, err := util.CreateSignedJwt(h.cnf.JWTSecretKey, util.Payload{
-		Sub:       usr.Id,
+		Sub:       usr.ID,
 		FirstName: usr.FirstName,
 		LastName:  usr.LastName,
 		Email:     usr.Email,
