@@ -43,7 +43,7 @@ func (server *Server) Start() {
 	server.itemHandler.RegisterRoutes(mux, manager)
 	server.userHandler.RegisterRoutes(mux, manager)
 
-	addr := ":" + strconv.Itoa(server.cnf.HttpPort)
+	addr := ":" + strconv.Itoa(server.cnf.HTTPPort)
 	fmt.Println("server running on", addr)
 	err := http.ListenAndServe(addr, wrappedMux)
 	// this will catch error if theres any while running the server
