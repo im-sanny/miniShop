@@ -2,7 +2,7 @@ package item
 
 import (
 	"encoding/json"
-	"miniShop/repo"
+	"miniShop/domain"
 	"miniShop/util"
 	"net/http"
 )
@@ -21,7 +21,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	createdItem, err := h.itemRepo.Create(repo.Item{
+	createdItem, err := h.svc.Create(domain.Item{
 		Name:  req.Name,
 		Brand: req.Brand,
 		Price: req.Price,

@@ -15,7 +15,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.itemRepo.Delete(id)
+	err = h.svc.Delete(id)
 	if err != nil {
 		util.SendError(w, http.StatusBadRequest, "Internal server error")
 		return

@@ -15,7 +15,7 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return                                                       // from here req will go back or stop
 	}
 
-	item, err := h.itemRepo.GetByID(id)
+	item, err := h.svc.GetByID(id)
 	if item == nil {
 		util.SendError(w, http.StatusNotFound, "item not found")
 	}

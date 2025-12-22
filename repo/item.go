@@ -2,24 +2,14 @@ package repo
 
 import (
 	"database/sql"
+	"miniShop/domain"
+	"miniShop/item"
 
 	"github.com/jmoiron/sqlx"
 )
 
-// Item represents a single item record
-type Item struct {
-	ID    int     `json:"id" db:"id"`
-	Name  string  `json:"name" db:"name"`
-	Brand string  `json:"brand" db:"brand"`
-	Price float64 `json:"price" db:"price"`
-}
-
 type ItemRepo interface {
-	Create(i Item) (*Item, error)
-	Get() ([]*Item, error)
-	GetByID(itemID int) (*Item, error)
-	Update(i Item) (*Item, error)
-	Delete(itemID int) error
+	item.ItemRepo
 }
 
 type itemRepo struct {
@@ -34,7 +24,7 @@ func NewItemRepo(db sqlx.DB) ItemRepo {
 }
 
 // CreateItem adds a new item to ItemList and assigns it a new ID
-func (r *itemRepo) Create(i Item) (*Item, error) {
+func (r *itemRepo) Create(i domain.Item) (*domain.Item, error) {
 	query := `
 		INSERT INTO items(
 			name,
@@ -56,8 +46,8 @@ func (r *itemRepo) Create(i Item) (*Item, error) {
 }
 
 // GetAllItem returns all items from ItemList
-func (r *itemRepo) Get() ([]*Item, error) {
-	var itemList []*Item
+func (r *itemRepo) Get() ([]*domain.Item, error) {
+	var itemList []*domain.Item
 
 	query := `
 		SELECT
@@ -75,8 +65,8 @@ func (r *itemRepo) Get() ([]*Item, error) {
 }
 
 // GetItemById finds an item by ID and returns a pointer to it
-func (r *itemRepo) GetByID(id int) (*Item, error) {
-	var itm Item
+func (r *itemRepo) GetByID(id int) (*domain.Item, error) {
+	var itm domain.Item
 
 	query := `
 		SELECT
@@ -98,7 +88,7 @@ func (r *itemRepo) GetByID(id int) (*Item, error) {
 }
 
 // UpdateItem updates an existing item based on its ID
-func (r *itemRepo) Update(i Item) (*Item, error) {
+func (r *itemRepo) Update(i domain.Item) (*domain.Item, error) {
 	query := `
 		UPDATE items
 		SET name=$1, brand=$2, price=$3

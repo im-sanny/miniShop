@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"miniShop/config"
 	"miniShop/infra/db"
+	"miniShop/item"
 	"miniShop/repo"
 	"miniShop/rest"
-	"miniShop/rest/handlers/item"
-	"miniShop/rest/handlers/user"
+	itemHandler "miniShop/rest/handlers/item"
+	userHandler "miniShop/rest/handlers/user"
 	middleware "miniShop/rest/middlewares"
+	"miniShop/user"
 )
 
 // - NewServer builds the server with everything it needs,
@@ -28,13 +30,18 @@ func Serve() {
 		fmt.Println(err)
 	}
 
+	// repos
 	itemRepo := repo.NewItemRepo(*dbCon)
 	userRepo := repo.NewUserRepo(dbCon)
 
-	middlewares := middleware.NewMiddlewares(cnf)
+	// domains
+	userSvc := user.NewService(userRepo)
+	itemSvc := item.NewService(itemRepo)
 
-	itemHandler := item.NewHandler(middlewares, itemRepo)
-	userHandler := user.NewHandler(cnf, userRepo)
+	// handlers
+	middlewares := middleware.NewMiddlewares(cnf)
+	itemHandler := itemHandler.NewHandler(middlewares, itemSvc)
+	userHandler := userHandler.NewHandler(cnf, userSvc)
 
 	server := rest.NewServer(cnf, itemHandler, userHandler)
 	server.Start()

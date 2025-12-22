@@ -2,7 +2,7 @@ package item
 
 import (
 	"encoding/json"
-	"miniShop/repo"
+	"miniShop/domain"
 	"miniShop/util"
 	"net/http"
 	"strconv"
@@ -29,7 +29,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item, err := h.itemRepo.Update(repo.Item{
+	item, err := h.svc.Update(domain.Item{
 		ID:    id,
 		Name:  req.Name,
 		Brand: req.Brand,
