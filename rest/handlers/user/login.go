@@ -28,6 +28,11 @@ func (h *Handler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if usr == nil {
+		util.SendError(w, http.StatusUnauthorized, "Unauthorized request")
+		return
+	}
+
 	accessToken, err := util.CreateSignedJwt(h.cnf.JWTSecretKey, util.Payload{
 		Sub:       usr.ID,
 		FirstName: usr.FirstName,
