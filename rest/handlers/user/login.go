@@ -21,7 +21,7 @@ func (h *Handler) UserLoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := h.userRepo.Find(req.Email, req.Password)
+	usr, err := h.svc.Find(req.Email, req.Password)
 	if err != nil {
 		fmt.Println(err)
 		util.SendError(w, http.StatusUnauthorized, "Invalid email or password")
