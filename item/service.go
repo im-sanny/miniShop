@@ -16,8 +16,8 @@ func (svc *service) Create(item domain.Item) (*domain.Item, error) {
 	return svc.itemRepo.Create(item)
 }
 
-func (svc *service) Get() ([]*domain.Item, error) {
-	return svc.itemRepo.Get()
+func (svc *service) Get(page, limit int64) ([]*domain.Item, error) {
+	return svc.itemRepo.Get(page, limit)
 }
 
 func (svc *service) GetByID(id int) (*domain.Item, error) {

@@ -46,8 +46,9 @@ func (r *itemRepo) Create(i domain.Item) (*domain.Item, error) {
 }
 
 // GetAllItem returns all items from ItemList
-func (r *itemRepo) Get() ([]*domain.Item, error) {
-	var itemList []*domain.Item
+func (r *itemRepo) Get(page, limit int64) ([]*domain.Item, error) {
+	offset := ((page - 1) * limit) + 1
+	var ilist []*domain.Item
 
 	query := `
 		SELECT
@@ -56,12 +57,28 @@ func (r *itemRepo) Get() ([]*domain.Item, error) {
 		brand,
 		price
 		from items
+		LIMIT $1
+		OFFSET $2
 	`
-	err := r.db.Select(&itemList, query)
+	err := r.db.Select(&ilist, query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
-	return itemList, nil
+	return ilist, nil
+}
+
+func (r *itemRepo) Count() (int64, error) {
+	query := `
+		SELECT
+			COUNT(*)
+		from items
+	`
+	var count int
+	err := r.db.QueryRow(query).Scan(&count)
+	if err != nil {
+		return 0, err
+	}
+	return int64(count), nil
 }
 
 // GetItemById finds an item by ID and returns a pointer to it
