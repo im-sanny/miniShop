@@ -17,9 +17,9 @@ type itemRepo struct {
 }
 
 // constructor or constructor function
-func NewItemRepo(db sqlx.DB) ItemRepo {
+func NewItemRepo(db *sqlx.DB) ItemRepo {
 	return &itemRepo{
-		db: &db,
+		db: db,
 	}
 }
 
@@ -45,10 +45,10 @@ func (r *itemRepo) Create(i domain.Item) (*domain.Item, error) {
 	return &i, nil
 }
 
-// GetAllItem returns all items from ItemList
+// Get returns paginated items
 func (r *itemRepo) Get(page, limit int64) ([]*domain.Item, error) {
-	offset := ((page - 1) * limit) + 1
-	var ilist []*domain.Item
+	offset := (page - 1) * limit
+	items := make([]*domain.Item, 0)
 
 	query := `
 		SELECT
@@ -57,28 +57,25 @@ func (r *itemRepo) Get(page, limit int64) ([]*domain.Item, error) {
 		brand,
 		price
 		from items
-		LIMIT $1
-		OFFSET $2
+		LIMIT $1 OFFSET $2
 	`
-	err := r.db.Select(&ilist, query, limit, offset)
+	err := r.db.Select(&items, query, limit, offset)
 	if err != nil {
 		return nil, err
 	}
-	return ilist, nil
+	return items, nil
 }
 
 func (r *itemRepo) Count() (int64, error) {
-	query := `
-		SELECT
-			COUNT(*)
-		from items
+	query := `SELECT COUNT(*)
+	FROM items
 	`
-	var count int
+	var count int64
 	err := r.db.QueryRow(query).Scan(&count)
 	if err != nil {
 		return 0, err
 	}
-	return int64(count), nil
+	return count, nil
 }
 
 // GetItemById finds an item by ID and returns a pointer to it
@@ -111,8 +108,7 @@ func (r *itemRepo) Update(i domain.Item) (*domain.Item, error) {
 		SET name=$1, brand=$2, price=$3
 		WHERE id=$4
 	`
-	row := r.db.QueryRow(query, i.Name, i.Brand, i.Price, i.ID)
-	err := row.Err()
+	_, err := r.db.Exec(query, i.Name, i.Brand, i.Price, i.ID)
 	if err != nil {
 		return nil, err
 	}

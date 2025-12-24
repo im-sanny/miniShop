@@ -31,7 +31,7 @@ func Serve() {
 	}
 
 	// repos
-	itemRepo := repo.NewItemRepo(*dbCon)
+	itemRepo := repo.NewItemRepo(dbCon)
 	userRepo := repo.NewUserRepo(dbCon)
 
 	// domains
