@@ -5,51 +5,49 @@ import (
 	"miniShop/util"
 	"net/http"
 	"strconv"
-	"sync"
 )
 
 func (h *Handler) Get(w http.ResponseWriter, r *http.Request) {
-	var (
+	type itemRes struct {
 		items []*domain.Item
+		err   error
+	}
+
+	type countRes struct {
 		count int64
-		err1  error
-		err2  error
-	)
+		err   error
+	}
 
-	reqQuery := r.URL.Query()
-
-	pageAsStr := reqQuery.Get("page")
-	limitAsStr := reqQuery.Get("limit")
-
-	page, _ := strconv.ParseInt(pageAsStr, 10, 32)
-	limit, _ := strconv.ParseInt(limitAsStr, 10, 32)
-
-	if page <= 0 {
+	page, err := strconv.ParseInt(r.URL.Query().Get("page"), 10, 32)
+	if err != nil || page <= 0 {
 		page = 1
 	}
 
-	if limit <= 0 {
+	limit, err := strconv.ParseInt(r.URL.Query().Get("limit"), 10, 32)
+	if err != nil || limit <= 0 {
 		limit = 10
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(2)
+	itemCh := make(chan itemRes, 1)
+	countCh := make(chan countRes, 1)
 
 	go func() {
-		defer wg.Done()
-		items, err1 = h.svc.Get(page, limit)
+		items, err := h.svc.Get(page, limit)
+		itemCh <- itemRes{items, err}
 	}()
 
 	go func() {
-		defer wg.Done()
-		count, err2 = h.svc.Count()
+		count, err := h.svc.Count()
+		countCh <- countRes{count, err}
 	}()
 
-	wg.Wait()
+	items := <-itemCh
+	count := <-countCh
 
-	if err1 != nil || err2 != nil {
+	if items.err != nil || count.err != nil {
 		util.SendError(w, http.StatusInternalServerError, "Internal server error")
+		return
 	}
 
-	util.SendPage(w, items, page, limit, count)
+	util.SendPage(w, items.items, page, limit, count.count)
 }
