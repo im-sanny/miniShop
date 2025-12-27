@@ -7,17 +7,26 @@ import (
 	"net/http"
 )
 
-type ReqCreateItem struct {
+type reqCreateItem struct {
 	Name  string  `json:"name"`
 	Brand string  `json:"brand"`
 	Price float64 `json:"price"`
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var req ReqCreateItem
+	defer r.Body.Close()
+
+	var req reqCreateItem
 	decoder := json.NewDecoder(r.Body) // Decode JSON request body into newAlbum
+	decoder.DisallowUnknownFields()
+
 	if err := decoder.Decode(&req); err != nil {
 		util.SendError(w, http.StatusBadRequest, "invalid JSON")
+		return
+	}
+
+	if req.Name == "" || req.Brand == "" || req.Price <= 0 {
+		util.SendError(w, http.StatusBadRequest, "invalid input")
 		return
 	}
 
@@ -27,7 +36,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		Price: req.Price,
 	})
 	if err != nil {
-		util.SendError(w, http.StatusInternalServerError, "Internal server error")
+		util.SendError(w, http.StatusInternalServerError, "failed to create item")
 		return
 	}
 	util.SendData(w, http.StatusCreated, createdItem)

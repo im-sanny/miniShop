@@ -1,23 +1,29 @@
 package item
 
 import (
+	"errors"
 	"miniShop/util"
 	"net/http"
 	"strconv"
 )
 
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
-	itemId := r.PathValue("itemId")
+	itemID := r.PathValue("itemId")
 
-	id, err := strconv.Atoi(itemId)
-	if err != nil {
-		util.SendError(w, http.StatusBadRequest, "invalid req")
+	id, err := strconv.Atoi(itemID)
+	if err != nil || id <= 0 {
+		util.SendError(w, http.StatusBadRequest, "invalid item id")
 		return
 	}
 
-	err = h.svc.Delete(id)
+	if err = h.svc.Delete(id); err != nil {
+		if errors.Is(err, util.ErrorNotFound) {
+			util.SendError(w, http.StatusNotFound, "item not found")
+			return
+		}
+	}
 	if err != nil {
-		util.SendError(w, http.StatusBadRequest, "Internal server error")
+		util.SendError(w, http.StatusInternalServerError, "failed to delete item")
 		return
 	}
 

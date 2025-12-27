@@ -2,22 +2,20 @@ package repo
 
 import (
 	"database/sql"
+	"errors"
 	"miniShop/domain"
 	"miniShop/item"
+	"miniShop/util"
 
 	"github.com/jmoiron/sqlx"
 )
-
-type ItemRepo interface {
-	item.ItemRepo
-}
 
 type itemRepo struct {
 	db *sqlx.DB
 }
 
 // constructor or constructor function
-func NewItemRepo(db *sqlx.DB) ItemRepo {
+func NewItemRepo(db *sqlx.DB) item.ItemRepo {
 	return &itemRepo{
 		db: db,
 	}
@@ -27,17 +25,13 @@ func NewItemRepo(db *sqlx.DB) ItemRepo {
 func (r *itemRepo) Create(i domain.Item) (*domain.Item, error) {
 	query := `
 		INSERT INTO items(
-			name,
-			brand,
-			price
+			name, brand, price
 		) VALUES (
-			$1,
-			$2,
-			$3
+			$1, $2, $3
 		)
 		 RETURNING id
 	`
-	row := r.db.QueryRow(query, i.Name, i.Brand, i.Price)
+	row := r.db.QueryRowx(query, i.Name, i.Brand, i.Price)
 	err := row.Scan(&i.ID)
 	if err != nil {
 		return nil, err
@@ -51,12 +45,8 @@ func (r *itemRepo) Get(page, limit int64) ([]*domain.Item, error) {
 	items := make([]*domain.Item, 0)
 
 	query := `
-		SELECT
-		id,
-		name,
-		brand,
-		price
-		from items
+		SELECT id, name, brand, price
+		FROM items
 		LIMIT $1 OFFSET $2
 	`
 	err := r.db.Select(&items, query, limit, offset)
@@ -83,18 +73,14 @@ func (r *itemRepo) GetByID(id int) (*domain.Item, error) {
 	var itm domain.Item
 
 	query := `
-		SELECT
-			id,
-			name,
-			brand,
-			price
-			from items
-			where id =$1
+		SELECT id, name, brand, price
+		FROM items
+		WHERE id = $1
 	`
 	err := r.db.Get(&itm, query, id)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return nil, nil
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, util.ErrorNotFound
 		}
 		return nil, err
 	}
@@ -108,10 +94,20 @@ func (r *itemRepo) Update(i domain.Item) (*domain.Item, error) {
 		SET name=$1, brand=$2, price=$3
 		WHERE id=$4
 	`
-	_, err := r.db.Exec(query, i.Name, i.Brand, i.Price, i.ID)
+	res, err := r.db.Exec(query, i.Name, i.Brand, i.Price, i.ID)
 	if err != nil {
 		return nil, err
 	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return nil, err
+	}
+
+	if rows == 0 {
+		return nil, util.ErrorNotFound
+	}
+
 	return &i, nil
 }
 
@@ -120,9 +116,18 @@ func (r *itemRepo) Delete(id int) error {
 	query := `
 		DELETE FROM items WHERE id =$1
 	`
-	_, err := r.db.Exec(query, id)
+	res, err := r.db.Exec(query, id)
 	if err != nil {
 		return err
+	}
+
+	rows, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rows == 0 {
+		return util.ErrorNotFound
 	}
 	return nil
 }

@@ -8,13 +8,14 @@ import (
 	"strconv"
 )
 
-type ReqUpdateItem struct {
+type reqUpdateItem struct {
 	Name  string  `json:"name"`
 	Brand string  `json:"brand"`
 	Price float64 `json:"price"`
 }
 
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
 	itemId := r.PathValue("itemId")
 
 	id, err := strconv.Atoi(itemId)
@@ -23,9 +24,17 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req ReqUpdateItem
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+	var req reqUpdateItem
+	decoder := json.NewDecoder(r.Body)
+	decoder.DisallowUnknownFields()
+
+	if err := decoder.Decode(&req); err != nil {
 		util.SendError(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+
+	if req.Name == "" || req.Brand == "" || req.Price <= 0 {
+		util.SendError(w, http.StatusBadRequest, "invalid input")
 		return
 	}
 

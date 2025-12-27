@@ -16,8 +16,14 @@ func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	item, err := h.svc.GetByID(id)
+	if err != nil {
+		util.SendError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
 	if item == nil {
 		util.SendError(w, http.StatusNotFound, "item not found")
+		return
 	}
 
 	util.SendData(w, http.StatusOK, item)

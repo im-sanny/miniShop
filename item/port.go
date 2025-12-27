@@ -17,3 +17,8 @@ type ItemRepo interface {
 	Delete(itemID int) error
 	Count() (int64, error)
 }
+
+// NOTE:
+// This interface mirrors rest/handlers/item.Service.
+// Kept intentionally to demonstrate port separation (DDD).
+// In small projects this can be removed without impact.

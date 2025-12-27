@@ -2,9 +2,12 @@ package util
 
 import (
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
+
+var ErrorNotFound = errors.New("item not found")
 
 // SendData writes the given data as JSON with the specified status code.
 func SendData(w http.ResponseWriter, statusCode int, data interface{}) {
