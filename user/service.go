@@ -2,6 +2,7 @@ package user
 
 import (
 	"miniShop/domain"
+	"strings"
 )
 
 type service struct {
@@ -15,23 +16,10 @@ func NewService(userRepo UserRepo) Service {
 }
 
 func (svc *service) Create(user domain.User) (*domain.User, error) {
-	usr, err := svc.userRepo.Create(user)
-	if err != nil {
-		return nil, err
-	}
-	if usr == nil {
-		return nil, nil
-	}
-	return usr, nil
+	return svc.userRepo.Create(user)
 }
 
 func (svc *service) Find(email string, pass string) (*domain.User, error) {
-	usr, err := svc.userRepo.Find(email, pass)
-	if err != nil {
-		return nil, err
-	}
-	if usr == nil {
-		return nil, nil
-	}
-	return usr, nil
+	email = strings.ToLower(strings.TrimSpace(email))
+	return svc.userRepo.Find(email, pass)
 }
