@@ -5,6 +5,7 @@ import (
 	"miniShop/util"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type loginReq struct {
@@ -36,12 +37,15 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	accessToken, err := util.CreateSignedJwt(h.cnf.JWTSecretKey, util.Payload{
-		Sub: usr.ID,
-		// FirstName: usr.FirstName,
-		// LastName:  usr.LastName,
+	now := time.Now().UTC()
+	claims := util.Claims{
+		Sub:   int64(usr.ID),
 		Email: usr.Email,
-	})
+		Iat:   now.Unix(),
+		Nbf:   now.Unix(),
+		Exp:   now.Add(60 * time.Minute).Unix(),
+	}
+	accessToken, err := util.CreateSignedJwt(h.cnf.JWTSecretKey, claims)
 	if err != nil {
 		util.SendError(w, http.StatusInternalServerError, "Internal server error")
 		return
