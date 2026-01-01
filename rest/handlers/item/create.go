@@ -11,6 +11,7 @@ type reqCreateItem struct {
 	Name  string  `json:"name"`
 	Brand string  `json:"brand"`
 	Price float64 `json:"price"`
+	Image string  `json:"image"`
 }
 
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
@@ -25,7 +26,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Name == "" || req.Brand == "" || req.Price <= 0 {
+	if req.Name == "" || req.Brand == "" || req.Price <= 0 || req.Image == "" {
 		util.SendError(w, http.StatusBadRequest, "invalid input")
 		return
 	}
@@ -34,6 +35,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		Name:  req.Name,
 		Brand: req.Brand,
 		Price: req.Price,
+		Image: req.Image,
 	})
 	if err != nil {
 		util.SendError(w, http.StatusInternalServerError, "failed to create item")

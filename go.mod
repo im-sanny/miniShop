@@ -12,4 +12,9 @@ require (
 	golang.org/x/crypto v0.46.0
 )
 
-require github.com/go-gorp/gorp/v3 v3.1.0 // indirect
+require (
+	github.com/go-gorp/gorp/v3 v3.1.0 // indirect
+	github.com/rakyll/hey v0.1.4 // indirect
+	golang.org/x/net v0.47.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
+)

@@ -25,13 +25,13 @@ func NewItemRepo(db *sqlx.DB) item.ItemRepo {
 func (r *itemRepo) Create(i domain.Item) (*domain.Item, error) {
 	query := `
 		INSERT INTO items(
-			name, brand, price
+			name, brand, price, image
 		) VALUES (
-			$1, $2, $3
+			$1, $2, $3, $4
 		)
 		 RETURNING id
 	`
-	row := r.db.QueryRowx(query, i.Name, i.Brand, i.Price)
+	row := r.db.QueryRowx(query, i.Name, i.Brand, i.Price, i.Image)
 	err := row.Scan(&i.ID)
 	if err != nil {
 		return nil, err
@@ -45,7 +45,7 @@ func (r *itemRepo) Get(page, limit int64) ([]*domain.Item, error) {
 	items := make([]*domain.Item, 0)
 
 	query := `
-		SELECT id, name, brand, price
+		SELECT id, name, brand, price, image
 		FROM items
 		LIMIT $1 OFFSET $2
 	`
@@ -73,7 +73,7 @@ func (r *itemRepo) GetByID(id int) (*domain.Item, error) {
 	var itm domain.Item
 
 	query := `
-		SELECT id, name, brand, price
+		SELECT id, name, brand, price, image
 		FROM items
 		WHERE id = $1
 	`
@@ -91,10 +91,10 @@ func (r *itemRepo) GetByID(id int) (*domain.Item, error) {
 func (r *itemRepo) Update(i domain.Item) (*domain.Item, error) {
 	query := `
 		UPDATE items
-		SET name=$1, brand=$2, price=$3
+		SET name=$1, brand=$2, price=$3, image=$4
 		WHERE id=$4
 	`
-	res, err := r.db.Exec(query, i.Name, i.Brand, i.Price, i.ID)
+	res, err := r.db.Exec(query, i.Name, i.Brand, i.Price, i.Image, i.ID)
 	if err != nil {
 		return nil, err
 	}

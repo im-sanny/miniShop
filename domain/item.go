@@ -6,4 +6,5 @@ type Item struct {
 	Name  string  `json:"name" db:"name"`
 	Brand string  `json:"brand" db:"brand"`
 	Price float64 `json:"price" db:"price"`
+	Image string  `json:"image" db:"image"`
 }
